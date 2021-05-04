@@ -4,12 +4,19 @@ System Administration Task 1 &amp; 2
 _Learning Outcomes that measured by this;_
 
     1. Describe the networking fundamentals
+    2. Describe the open source firewall system
+    3. Build customized installation
+    4. Describe the packages and services Repositories
+    5. Describe the process and services management /task management
+    6. Describe the process of Load balancing management
+    7. Describe the process of backup mechanism
 
 #### _Configuration on Above topics_
-    Zimbra mail server
-    DNS Server
-    Samba Server
-    Apache Web Server
+    
+   Zimbra mail server       <br />
+   DNS Server       <br />
+   Samba Server     <br />
+   Apache Web Server        <br />
 
 
 # System-Administration-2
