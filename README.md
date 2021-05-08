@@ -1,8 +1,10 @@
-# Sys-Administration
+# Sys-Admin
+Here i have uploaded tast that was given for me in System Administration which has divided into two.
 
-System Administration Task 1 & 2
 
-_Learning Outcomes that measured by this;_
+# System-Administration 01
+
+#### _Learning Outcomes that measured by this;_
 
     1. Describe the networking fundamentals
     2. Introduction to Open Source Operating Systems 
@@ -25,9 +27,9 @@ _Learning Outcomes that measured by this;_
 
 
 
-# System-Administration-2
+# System-Administration 02
 
-_Learning Outcomes that measured by this;_
+#### _Learning Outcomes that measured by this;_
 
     1. Describe the networking fundamentals
     2. Describe the open source firewall system
