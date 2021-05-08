@@ -17,10 +17,10 @@ _Learning Outcomes that measured by this;_
 
 #### _Configuration on Above topics_
     
-- Zimbra mail server  [SysAdmin](./System-Administration-1/ZimbraMail.pdf) 
-- NS Server      [SysAdmin](./System-Administration-1/System-Administrator1.pdf) 
-- Samba Server     [SysAdmin](./System-Administration-1/System-Administrator1.pdf) 
-- Apache Web Server    [SysAdmin](./System-Administration-1/System-Administrator1.pdf) 
+- Zimbra mail server  [Zimbra PDF](./System-Administration-1/ZimbraMail.pdf) 
+- DNS Server      [SysAdmin PDF](./System-Administration-1/System-Administrator1.pdf) 
+- Samba Server     [SysAdmin PDF](./System-Administration-1/System-Administrator1.pdf) 
+- Apache Web Server    [SysAdmin PDF](./System-Administration-1/System-Administrator1.pdf) 
 
 
 
