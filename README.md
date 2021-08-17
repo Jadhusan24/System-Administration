@@ -1,5 +1,5 @@
 # Sys-Admin
-Here i have uploaded tast that was given for me in System Administration which has divided into two.
+Here i have uploaded task that was given for me in System Administration which has divided into two.
 
 
 # System-Administration 01
