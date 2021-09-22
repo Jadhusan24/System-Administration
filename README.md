@@ -2,7 +2,7 @@
 Here i have uploaded task that was given for me in System Administration which has divided into two.
 
 
-# System-Administration 01
+# System-Administration TASK 01
 
 #### _Learning Outcomes that measured by this;_
 
@@ -27,7 +27,7 @@ Here i have uploaded task that was given for me in System Administration which h
 
 
 
-# System-Administration 02
+# System-Administration TASK 02
 
 #### _Learning Outcomes that measured by this;_
 
