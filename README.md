@@ -1,4 +1,4 @@
-# Sys-Admin
+# System Administration 
 Here i have uploaded task that was given for me in System Administration which has divided into two.
 
 
