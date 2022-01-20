@@ -1,0 +1,128 @@
+hostnamectl set-hostname client.example.com
+
+vim /etc/hosts
+192.168.252.176 client.example.com client
+
+yum install httpd* -y
+
+systemctl enable httpd
+systemctl start httpd
+systemctl status httpd
+
+firewall-cmd --add-service=http --permanent 
+firewall-cmd --add-service=https --permanent 
+firewall-cmd --reload 
+firewall-cmd --list-services
+
+mkdir /var/www/host80
+cd /var/www/host80
+touch web1.html
+vim web1.html
+<HTML>
+<HEAD>
+<TITLE>TEST PAGE AT HOST-80</TITLE>
+<BODY>
+<H1>TEST PAGE AT VIRTUAL HOST RUNNING AT PORT 80</H1>
+</BODY>
+</HTML>
+
+vim /etc/httpd/conf.d/vhost.conf
+<VirtualHost *:80>
+  ServerAdmin webmaster@client.example.com
+  DocumentRoot /var/www/host80
+  ServerName client.example.com
+  ErrorLog "logs/client.example.com-error_log"
+  TransferLog "logs/client.example.com-access_log"
+<Directory /var/www/host80>
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</Directory>
+</VirtualHost>
+
+<VirtualHost *:8080>
+  ServerAdmin webmaster@client.example.com
+  DocumentRoot /var/www/host8080
+  ServerName client.example.com
+  ErrorLog "logs/client.example.com-error_log"
+  TransferLog "logs/client.example.com-access_log"
+
+<Directory /var/www/host8080>
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</Directory>
+
+</VirtualHost>
+
+systemctl restart httpd
+httpd -t
+
+vim /etc/httpd/conf/httpd.conf 
+DocumentRoot "/var/www/host80"
+<Directory "/var/www/host80">
+<Directory "/var/www/host80">
+systemctl restart httpd
+httpd -t
+
+yum install haproxy -y
+
+systemctl enable haproxy
+systemctl start haproxy
+systemctl status haproxy
+
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+
+firewall-cmd --add-port=9000/tcp --permanent
+firewall-cmd --reload 
+firewall-cmd --list-ports
+
+vim /etc/haproxy/haproxy.cfg
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+#HAproxy monitoring
+stats uri /stats
+stats auth admin:Abc@123
+#---------------------------------------------------------------------
+# main frontend which proxys to the backends
+#---------------------------------------------------------------------
+frontend main
+    bind *:9000
+
+#---------------------------------------------------------------------
+# round robin balancing between the various backends
+#---------------------------------------------------------------------
+backend app
+    balance     roundrobin
+    server  server1 192.168.252.176:9000 check
+    server  server2 192.168.252.177:9000 check
+
+vim /etc/rsyslog.d/haproxy.conf
+local2.=info /var/log/haproxy-access.log #access log
+local2.notice /var/log/haproxy-info.log #server info loadbalance
+
+systemctl restart rsyslog
+systemctl restart haproxy
+
+http://192.168.252.176:9000/stats
+
+rsync -av /home/student/ client.example.com:/tmp/backup/
