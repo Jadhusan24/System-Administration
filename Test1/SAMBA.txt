@@ -1,0 +1,69 @@
+---SAMBA---
+need 3 applications to configure SAMBA
+SMB --server message 
+
+hostnamectl set-hostname fileserver.example.com
+hostnamectl
+ip address
+ping fileserver / ip add
+
+nano /etc/hosts
+192.168.174.128 filesever.example.com(domain) fileserver(hostname)
+ping fileserver
+dnf makecache        #update repositories
+dnfsearch samba
+dnf install samba samba-common samba-client -y / dnf install samba*
+systemctl status smb
+systemctl status nmb
+smbd # to see the version
+rpm -qi samba
+systemctl enable smb nmb
+systemctl start smb nmb
+systemctl status smb nmb
+firewall-cmd --info-service=samba
+firewall-cmd-cmd --add-service=samba --permanent
+firewall-cmd --add-port=137/udp --permanent
+firewall-cmd --add-port=138/udp --permanent
+firewall-cmd --add-port=139/tcp --permanent
+firewall-cmd --add-port=445/tcp --permanent      firewall-cmd --remove-port=445/tcp
+firewall-cmd --reload
+firewall-cmd --listall
+cd /etc/samba/
+ls
+cp -av /etc/samba/smb.conf /etc/samba/smb.conf.bak
+ls =l /etc/samba
+mkdir -p /fileserver/common
+ls -l /
+nano /etc/samba/smb.conf
+ls -l /etc/samba
+
+nano /etc/samba/smb.conf.example
+
+[global]
+    workgroup = WORKGROUP
+    hosts allow = 192.168.174.0/24
+
+
+
+(at the end)
+### Network share folders ###
+[common_share]
+        comment = Everyone can access common share
+        path = /fileserver/common
+        writable = YES
+        guest ok = NO
+        browseable = YES
+
+ls -ld /fileserver/common/
+chmod 777 /fileserver/common/
+testparm #check parameters
+systemctl restart smb nmb
+
+
+
+
+
+
+
+
+

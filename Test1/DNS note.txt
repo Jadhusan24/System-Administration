@@ -1,0 +1,210 @@
+DNS - not a centralized service.
+
+1. local cache ----- Recursive name servers 
+2. local dns server (dns cache) ---- Recursive name servers
+3. isp (cache) ----- Recursive name servers 
+4. resolving (if not resolved contacting root servers) ---- Authoritaive name servers
+   Top level domain, Second level domain, Third level domain ---- Authoritaive name servers
+
+www.google.com(.) (.) --Root 
+
+ipconfig /displaydns -display dns
+ipconfig /flushdns -flushing dns
+
+preferred and alternative dns
+*when one server is down it checks the other server
+
+primary and secondary server
+*Secondary server is used as a backup. It replicates the files from the primary server. 
+
+DNS security
+1.DNS cache poisoning and DNS snooping - is the act of entering false information into a DNS cache,
+so that DNS queries return an incorrect response and users are directed to the wrong websites.
+
+Preventing mechanisms 
+1.DNSsec - creates a secure domain name system by adding cryptographic signatures to existing DNS records.
+2.DNS roundrobin - we can use several ips for a one domain name. load balancing, fault tolerance.
+
+DNS use BIND package domain name system.
+sevice name named d
+
+--- CONFIGURATION ---
+
+hostname
+-- hostnamectl set-hostname fqda
+-- /etc/hostname
+
+to verify
+-- hostnamectl
+
+used ports in dns?
+53 - to transmit DNS queries
+953 - rndc (remote name demon control) used to manage the name servers.
+
+why we intall bind?
+*to quering names
+
+why we install bind-utils?
+
+rpm -qa bind --displays the installed bind package
+rpm -qi bind --full bind package information
+dnf makecache
+dnf install bind bind-utils -y
+systemctl status named --to check the status
+systemctl enable named --to enable the named
+systemctl start named --to start the named
+systemctl status named
+nano /etc/named.conf --to see the config file (edit listen-on and allow query insert our network)
+sudo cp -p /etc/named.conf /home/anjala/Downloads --to copy the file to Downloads (cp -p /etc/named.conf /etc/named.conf.bak)
+cat /etc/passwd | grep named
+ls -al /etc/named.conf
+named-checkconf --to check the config file
+
+nano /home/anjala/Downloads/named.conf
+add our ip add to the loop back add
+add our network ip to the local host
+named-checkconf
+systemctl restart named --restart the system
+
+ADDING 2 PORTS 
+firewall-cmd --permanent --add-port=53/tcp --the limit of udp packet size is 512bytes more than 512bytes are sent by tcp ports. 
+firewall-cmd --permanent --add-port=53/udp --udp is used by apps to deliver a faster stream of information by 
+                                             doing away with error checking.
+
+firewall-cmd --reload
+firewall-cmd --list-all
+firewall-cmd --list-ports --to verify the ports
+
+*normally we use udp in firewall betwwen a pc and a server, between a server and a server we use tcp because of acknowledgement.
+
+nano /etc/named.conf (as a localhost DNS resolver only --DNS belong to the localhost)
+
+forward lookup zone
+*used to map a host name to an IP address. (IN --internet names, type master --primary DNS server, file --contains zone entries)
+
+reverse lookup zone
+*used to map IP addresses to host names.
+
+zone "example.com" IN {
+      type master;
+      file "forward.example.com.db";
+      allow-update { none; };
+      allow-query { any; };
+};
+zone " 244.168.192.in-addr.arpa" IN {
+       type master;
+       file "reverse.example.com.db";
+       allow-update { none; };
+       allow-query { any; };
+};
+
+
+--create the files --forward.example.com.db
+                   --reverse.example.com.db
+
+nano /var/named/forward.example.com.db
+nano /var/named/reverse.example.com.db
+
+systemctl status named.service
+
+
+IN FORWARD FILE
+
+$ORIGIN example.com.
+$TTL 86400
+@ IN SOA example.com. root.example.com. (
+2017020401 ; serial
+3600 ; refresh
+1800 ; retry
+604800 ; expire
+86400 ) ; minimum TTL
+;
+; define nameservers
+IN NS example.com.
+;
+; IP address and hostname
+spacex1 IN A 192.168.1.5
+;
+;client records
+spacex3 IN A 192.168.1.100
+
+
+IN REVERSE FILE
+
+
+$ORIGIN 1.168.192.in-addr.arpa.
+$TTL 86400
+@ IN SOA example.com. root.example.com. (
+2017020402 ; serial
+3600 ; refresh
+1800 ; retry
+604800 ; expire
+86400 ) ; minimum TTL
+;
+;nameservers
+IN NS example.com.
+;
+;nameserver IP addresses
+IN A 192.168.1.5
+;
+; client IP Address
+IN A 192.168.1.100
+; nameserver PTR records
+10 IN PTR example.com.
+;
+; client PTR records
+20 IN PTR example.com.
+
+
+named-checkzone example.com /var/named/forward.example.com
+
+named-checkzone example.com /var/named/reverse.example.com
+
+
+named-checkconf
+
+named-checkzone example.com /var/named/forward.example.com.db ---to check the zone file
+
+---in nano /var/named/reverse.example.com.db (ptr records)
+
+cp -av /var/named/forward.example.com.db /var/named/reverse.example.com.db (-av append the contents)
+
+$TTL 86400
+@ IN SOA server.example.com. root.example.com. (
+                     2020102901 ; Serial
+                     3600 ; Refresh
+                     1800 ; Retry
+                     604800 ; Expire
+                     86400 ; Minimum TTL
+)
+
+;Name Server-------------------------------------
+@	IN	 NS	  server.example.com.
+;IP Information----------------------------------
+server       IN      A       192.168.244.131
+
+;Reverse lookup(Name Server)--------------------
+131  	       IN      PTR      server.example.com.
+
+;PTR---------------------------------------------
+132   	      IN      PTR      client1.example.com
+133   	      IN      PTR      client2.example.com
+
+systemctl restart named
+
+set the client
+
+nslookup server.example.com  
+
+--ATTACKS
+dns hijack
+dns spoofing
+dns roundrobin
+
+master slave windows client linux client
+
+nmcli connection modify ens33 ipv4.addresses 192.168.1.200/24
+nmcli connection modify ens33 ipv4.dns "192.168.1.5 192.168.1.6"
+nmcli connection down ens33 ;nmcli connection up ens33
+
+nano /etc/named.rfc1912.zones

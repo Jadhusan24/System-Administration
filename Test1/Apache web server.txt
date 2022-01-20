@@ -1,0 +1,257 @@
+--APACHE WEB SERVER--(web1, web2)
+
+ssh root@servera
+
+rpm -qi httpd #to see httpd package (query install)
+rpm -qa httpd #(query all)
+dnf-makecache #to update dnf
+hostnamectl set-hostname web1.example.com #in web1
+hostnamectl set-hostname web2.example.com #in web2
+vi /etc/hosts #update hostname in both webs(192.168.1.1 web1.example.com)
+(192.168.1.6 web2.example.com)
+scp /etc/hosts root@192.168.1.6:/etc/hosts
+cat /etc/hosts
+ping web1
+ping web2
+dnf grouplist
+------------------------------------------------
+yum groupinstall "Basic Web Server" (manual also installed)
+yum install httpd -y (only basics are installed)
+yum install httpd*
+-------------------------------------------------
+systemctl status httpd
+systemctl start httpd
+systemctl status httpd
+reboot
+rht-vmctl status serverb
+ssh root@serverb
+systemctl status httpd
+systemctl enable httpd (symlink-shortcut)
+systemctl start httpd
+systemctl status httpd
+
+
+--WEB1--
+rpm -qi httpd
+dnf groupinstall "Basic Web Server" -y
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd
+#open web browser type localhost
+getenforce or sestatus
+#localhost/manual/ then virtual hosts
+
+
+--WEB2--
+yum install httpd -y
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd
+#open web browser type localhost
+#localhost/manual --- manual page not found in web2 (reason-when you install it with install httpd only the basics are installed not manual page)
+
+#creating a web page
+nano /etc/httpd/conf/httpd.conf
+ls -dZ /var/www/html/ (to retreive se linux directory)
+mkdir /custom
+echo 'This is my web server' > /custom/index.html
+cd /custom/
+ls
+cat index.html
+cd /
+nano /etc/httpd/conf/httpd.conf
+DocumentRoot "/custom"
+<Directory "/custom">
+#localhost/index.html (not found)
+systemctl restart httpd
+#localhost/index.html (forbidden (reason-after changing the default path selinux context type of the document root is not changed))
+ls -dZ /var/www/html/
+
+ls -dZ /custom/
+setenforce 0
+getenforce (permissive mode for testing)
+#reload the web page
+semanage fcontext -a -t httpd _sys_content_t "/custom(/.*)?"
+restorecon -R -v /custom
+getenforce
+setenforce 1
+getenforce
+#localhost/index.html
+
+------------------
+mkdir /var/www/html/web
+echo "this is my web2" >/var/www/html/web/index.html
+cd /var/www/html/web
+ls
+cat index.html
+ls -Z index.html
+cd /
+cd /var/www/html/
+ls
+mv web/ /
+cd /
+ls
+ls -dZ web/
+cd web/
+ls
+ls -Z index.html
+nano /etc/httpd/conf/httpd.conf
+
+-------------------
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=htts
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+firewall-cmd --list-all
+---------------------------------------------------
+
+---VIRTUAL HOST CONFIGURATION---
+
+hostnamectl set-hostname web1.example.com
+nano /etc/hosts/ #192.168.1.23 web1.example.com web1
+scp /etc/hosts root@192.168.6:
+yum groupinstall "Basic Web Server" -y
+systemctl enable httpd
+systemctl start httpd
+systemctl status httpd
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+firewall-cmd --list-services
+#search in browser localhost localhost/manual/ (user guide for virtual host copy the parameters)
+nano /etc/httpd/conf.d/vhost.conf
+<VirtualHost *:80>
+ ServerAdmin webmaster@web1.example.com
+ DocumentRoot /var/www/html
+ ServerName web1.example.com
+ ErrorLog "logs/web1.example.com-error_log"
+ TransferLog "logs/web1.example.com-access_log"
+ 
+<Directory /var/www/html>    #access control in manual and require all
+
+    <RequireAll>
+     Require all granted
+    </RequireAll>
+<Directory>
+</VirtualHost>
+
+echo 'This is my first web page' > /var/www/html/index.html
+systemctl restart httpd
+httpd -t #check errors
+#browse localhost
+
+nano /etc/httpd/conf.d/vhost.conf #restrict to access the webpage
+Require all granted
+  Require not ip 192.168.1.6
+ </RequireAll>
+mkdir /usr/local/vhosts #adding another webpage to this server
+echo 'This is My Second Page' > /usr/local/vhosts/index.html
+nano /etc/httpd/conf.d/vhost.conf
+######################################
+<VirtualHost *:80>
+ ServerAdmin webmaster@web6.example.com
+ DocumentRoot /usr/local/vhost
+ ServerName web6.example.com
+ ErrorLog "logs/web6.example.com-error_log"
+ TransferLog "logs/web6.example.com-access_log"
+ 
+<Directory /usr/local/vhosts> 
+    <RequireAll>
+     Require all granted
+    </RequireAll>
+<Directory>
+</VirtualHost>
+
+systemctl restart httpd
+httpd -t
+#browse web6.example.com
+nano /etc/hosts
+#192.168.1.23 web6.example.com web6
+scp /etc/hosts root@192.168.1.6:/etc/hosts
+
+mkdir /var/www/html/webdir
+nano /etc/httpd/conf.d/vhost.conf
+ 
+<Directory /var/www/html/webdir> 
+    <RequireAll>
+     Require all granted
+    </RequireAll>
+</Directory>
+</VirtualHost>
+
+systemctl restart httpd
+httpd -t
+
+#browse web1.example.com?webdir
+
+--CLIENT--
+hostnamectl set-hostname client.example.com
+#check the ip address in client and enter in server()
+curl web1.example.com #retrieve webpage
+#browse web1.example.com
+
+
+
+---CONFIGURING ZIMBRA WITH DNS---
+
+initial dns configuratio
+
+--DNS--
+#hostname = server.example.com
+rpm -qi bind
+yum install bind * -y
+nano /etc/named.conf
+nano /etc/named.rfc1912.zones
+#update zone files
+nano /var/named/forward.zone
+nano /etc/resolv.conf
+#update on both sides
+#add firewall rule port 53 tcp & udp
+
+--MailServer--
+#hostname = mail.example.com
+# download zimbra in lap (zimbra collaboration open source, 25-50 mail boxes, zimbra open source edition, education, never)
+cd /opt/
+wget paste
+ls
+tar xzvf -----
+mv zcs -- mail
+cd mail/
+cd /
+scp /opt/mail/ root@192.168.1.6:opt
+(zimbra console--admin@mail.example.com)
+# add firewall(25/tcp 80/tcp 110/tcp 143/tcp 389/tcp 443/tcp 993/tcp 7025/tcp 22/tcp 53/tcp)
+systemctl stop sendmail
+systemctl stop postfix
+
+? help
+4
+abc@123
+r
+a
+yes
+yes
+
+zmprov ms mail.example.com zimbraMtaLmtpHostLookup native
+zmmtactl restart
+
+
+Apache dns zimbra samba windows part
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
