@@ -14,7 +14,7 @@ Here i have uploaded task that was given for me in System Administration which h
     6. Service and Process Management 6
     7. Centralized users and group Management 
     8. Domain Name Service 
-    9. Web ,Email and Storage Services 
+    9. Web, Email and Storage Services 
     10. DHCP/FTP Service
     11. Implement Enhanced Security
 
